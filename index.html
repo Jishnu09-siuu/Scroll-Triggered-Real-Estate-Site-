@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Luxe Legacy Real Estate</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>"/>
+  
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+  
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline": "#71717a",
+            "surface-container": "#f0eff2",
+            "error-container": "#ffdad6",
+            "on-secondary-fixed-variant": "#5b430e",
+            "on-primary-fixed": "#0d1c31",
+            "on-primary-container": "#76849e",
+            "on-secondary": "#ffffff",
+            "on-surface": "#18181b",
+            "on-background": "#18181b",
+            "on-error": "#ffffff",
+            "outline-variant": "#e4e4e7",
+            "secondary-container": "#fed895",
+            "on-tertiary": "#ffffff",
+            "muted-gold": "#B59458",
+            "on-surface-variant": "#52525b",
+            "tertiary-fixed-dim": "#c8c6c3",
+            "on-secondary-fixed": "#271900",
+            "ink-black": "#0A0A0A",
+            "secondary-fixed-dim": "#B59458",
+            "tertiary-container": "#1c1c1a",
+            "inverse-primary": "#b9c7e3",
+            "on-tertiary-fixed-variant": "#474745",
+            "surface-container-low": "#f8f7fa",
+            "surface-tint": "#515f77",
+            "on-secondary-container": "#785c26",
+            "tertiary-fixed": "#e5e2df",
+            "background": "#ffffff",
+            "surface-bright": "#ffffff",
+            "deep-navy": "#000D22",
+            "secondary": "#B59458",
+            "surface-container-high": "#e4e4e7",
+            "inverse-on-surface": "#ffffff",
+            "on-primary-fixed-variant": "#39475f",
+            "primary-container": "#0d1c31",
+            "tertiary": "#000000",
+            "primary-fixed": "#d5e3ff",
+            "on-tertiary-container": "#858481",
+            "surface-variant": "#f4f4f5",
+            "on-tertiary-fixed": "#1c1c1a",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#e4e4e7",
+            "inverse-surface": "#18181b",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#b9c7e3",
+            "on-error-container": "#93000a",
+            "primary": "#09090b",
+            "paper-white": "#ffffff",
+            "secondary-fixed": "#ffdea7",
+            "surface-dim": "#e4e4e7",
+            "on-primary": "#ffffff",
+            "surface": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "32px",
+            "section-gap-sm": "64px",
+            "section-gap-lg": "120px",
+            "container-max": "1440px",
+            "margin-desktop": "80px",
+            "unit": "8px",
+            "margin-mobile": "24px"
+          },
+          "fontFamily": {
+            "body-sm": ["Poppins"],
+            "display-lg-mobile": ["Poppins"],
+            "button": ["Poppins"],
+            "label-caps": ["Poppins"],
+            "headline-xl": ["Poppins"],
+            "body-md": ["Poppins"],
+            "display-lg": ["Poppins"],
+            "headline-lg": ["Poppins"],
+            "body-lg": ["Poppins"],
+            "headline-md": ["Poppins"]
+          },
+          "fontSize": {
+            "body-sm": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "display-lg-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "button": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+            "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.15em", "fontWeight": "600" }],
+            "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "30px", "fontWeight": "400" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Lenis Smooth Momentum Scroll Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+</head>
+
+<body class="bg-[#030303] text-on-background font-body-md antialiased selection:bg-secondary selection:text-on-secondary">
+  
+  <!-- Pure White Screen (Multi-Part Horizontal-Only Split 120fps Loading Animation) -->
+  <div id="whiteLoader" aria-hidden="true">
+    <div class="loader-slat slat-0"></div>
+    <div class="loader-slat slat-1"></div>
+    <div class="loader-slat slat-2"></div>
+    <div class="loader-slat slat-3"></div>
+    <div class="loader-slat slat-4"></div>
+    <div class="loader-slat slat-5"></div>
+  </div>
+
+  <script>
+    // Pure White Screen Luxury Multi-Part Slat Split Safety Net
+    (function() {
+      function doSplit() {
+        var loader = document.getElementById('whiteLoader');
+        if (loader && !loader.classList.contains('split')) {
+          loader.classList.add('split');
+          document.body.classList.add('hero-loaded');
+          setTimeout(function() {
+            if (loader) {
+              loader.classList.add('loader-done');
+              loader.style.display = 'none';
+            }
+          }, 2200);
+        }
+      }
+      // Safety net: triggers only if external assets or script execution is stalled
+      setTimeout(doSplit, 1200);
+    })();
+  </script>
+  
+  <!-- Top Navigation (Pure White Text Desktop + Mobile Luxury Glassmorphic Menu) -->
+  <nav id="topNav" class="fixed top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-10 z-50 flex items-center">
+    <!-- Desktop Links -->
+    <div class="hidden md:flex items-center space-x-6 md:space-x-8 text-xs uppercase tracking-[0.2em] font-medium text-white">
+      <a class="text-white hover:opacity-75 transition-opacity duration-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" href="#portfolio">Portfolio</a>
+      <a class="text-white hover:opacity-75 transition-opacity duration-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" href="#services">Services</a>
+      <a class="text-white hover:opacity-75 transition-opacity duration-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" href="#market-insights">Market Insight</a>
+      <a class="text-white hover:opacity-75 transition-opacity duration-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" href="#contact">Contact</a>
+    </div>
+
+    <!-- Mobile Hamburger Button -->
+    <button id="mobileMenuToggle" type="button" aria-label="Toggle navigation menu" class="md:hidden flex items-center justify-center w-11 h-11 rounded-full bg-black/60 border border-white/20 text-white backdrop-blur-md shadow-lg transition-all active:scale-95">
+      <span class="material-symbols-outlined menu-icon text-2xl">menu</span>
+    </button>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" class="absolute top-14 right-0 w-64 bg-black/90 border border-white/15 rounded-2xl p-5 shadow-2xl flex flex-col space-y-4 md:hidden text-xs uppercase tracking-[0.2em] font-medium text-white z-50">
+      <a class="mobile-nav-link text-white hover:text-secondary py-2 border-b border-white/10 transition-colors" href="#portfolio">Portfolio</a>
+      <a class="mobile-nav-link text-white hover:text-secondary py-2 border-b border-white/10 transition-colors" href="#services">Services</a>
+      <a class="mobile-nav-link text-white hover:text-secondary py-2 border-b border-white/10 transition-colors" href="#market-insights">Market Insight</a>
+      <a class="mobile-nav-link text-white hover:text-secondary py-2 transition-colors" href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section (Full 1601 frame animation plays completely throughout this track) -->
+  <section id="hero">
+    <canvas id="canvas"></canvas>
+
+    <!-- Bottom Left Brand Logo -->
+    <div id="heroLogo" class="fixed bottom-6 left-4 sm:bottom-8 sm:left-6 md:bottom-12 md:left-12 z-30 pointer-events-none select-none max-w-[calc(100vw-2rem)]">
+      <h1 class="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-[-0.04em] text-white uppercase leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+        LUXE LEGACY
+      </h1>
+      <p class="text-[10px] sm:text-xs md:text-sm font-semibold tracking-[0.25em] sm:tracking-[0.3em] text-white uppercase mt-2 sm:mt-3 drop-shadow-md">
+        Architectural Sanctuary
+      </p>
+    </div>
+
+    <!-- House Showcase Text (3 lines, reveals when house is visible properly) -->
+    <div id="heroHouseText" class="fixed left-4 sm:left-6 md:left-14 bottom-8 sm:bottom-10 md:bottom-14 z-30 pointer-events-none select-none max-w-[calc(100vw-2rem)] md:max-w-2xl opacity-0">
+      <p class="text-[10px] sm:text-xs md:text-sm font-semibold tracking-[0.25em] sm:tracking-[0.3em] text-secondary-fixed-dim uppercase mb-1.5 sm:mb-2 drop-shadow-md">
+        THE RESIDENCE
+      </p>
+      <div class="space-y-1 sm:space-y-2">
+        <h2 class="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-[-0.03em] text-white uppercase leading-none drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]">
+          CRAFTED BY NATURE
+        </h2>
+        <h3 class="text-base sm:text-2xl md:text-4xl font-extrabold tracking-[-0.02em] text-white/90 uppercase leading-none drop-shadow-[0_8px_25px_rgba(0,0,0,0.85)]">
+          12,500 SQ FT HILLSIDE SANCTUARY
+        </h3>
+        <p class="text-xs sm:text-lg md:text-2xl font-medium tracking-normal text-white/80 uppercase leading-tight drop-shadow-lg">
+          WITH UNRESTRICTED HORIZON VIEWS
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Sections (Smoothly reveal after full animation has finished playing) -->
+  <main class="relative z-20 bg-background shadow-2xl">
+    <!-- Featured Portfolio (Two Tall Half-Page Scrolling Estates - Sharp Editorial Architecture) -->
+    <section id="portfolio" class="py-section-gap-lg px-margin-mobile md:px-margin-desktop bg-black text-white">
+      <div class="max-w-container-max mx-auto">
+        <!-- Section Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 fade-in-up">
+          <div>
+            <span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.2em] mb-3 block heading-reveal">CURATED PORTFOLIO</span>
+            <h2 class="font-headline-xl text-headline-xl text-white heading-reveal">Featured Architectural Estate</h2>
+          </div>
+          <a href="#contact" class="mt-4 md:mt-0 font-button text-button text-white hover:text-secondary border-b border-white hover:border-secondary pb-1 transition-colors inline-flex items-center group">
+            Private Portfolio Inquiries
+            <span class="material-symbols-outlined ml-2 transform group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Two Column 50/50 Tall Image Layout (Offset Editorial Scroll - 4K Architectural Imagery) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start">
+          <!-- Left Column (Estate 1 - Positioned Higher) -->
+          <div class="flex flex-col fade-in-up md:-mt-10 lg:-mt-14">
+            <!-- Tall 4K Image (Responsive mobile height, monumental desktop height) -->
+            <div class="relative w-full h-[70vh] min-h-[460px] md:h-[260vh] md:min-h-[1900px] overflow-hidden border border-white/15 group card-hover shadow-sm">
+              <div class="absolute inset-0 bg-cover bg-center w-full h-full transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                   data-alt="Ultra-high-definition 4K modernist architectural glass sanctuary with reflection pool."
+                   style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=90&w=3840&auto=format&fit=crop')">
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+              <div class="absolute bottom-6 left-6">
+                <span class="bg-black/80 backdrop-blur-md text-white text-xs sm:text-sm font-semibold tracking-wider px-3.5 py-1.5 shadow-md border border-white/20">
+                  $18,500,000
+                </span>
+              </div>
+            </div>
+
+            <!-- Details Below Left Image 1 -->
+            <div class="pt-8 pb-4 flex flex-col">
+              <span class="font-label-caps text-[10px] md:text-xs text-white/60 uppercase tracking-[0.25em] block mb-2">Bel Air Crest, California</span>
+              <h3 class="text-xl md:text-2xl font-bold uppercase tracking-[0.15em] text-white mb-3 heading-reveal leading-snug">
+                The Glass House Sanctuary
+              </h3>
+              <p class="text-xs md:text-sm text-white/70 tracking-[0.05em] leading-relaxed max-w-xl">
+                A modernist tour de force sculpted with seamless floor-to-ceiling glass lines, cantilevered terraces, and unrestricted panoramic ocean horizons.
+              </p>
+            </div>
+
+            <!-- Left Column Estate 3 (Positioned Lower Down - Reduced Size) -->
+            <div class="mt-14 md:mt-44 lg:mt-60 flex flex-col fade-in-up">
+              <!-- Reduced Size 4K Image -->
+              <div class="relative w-full h-[55vh] min-h-[380px] md:h-[140vh] md:min-h-[900px] overflow-hidden border border-white/15 group card-hover shadow-sm">
+                <div class="absolute inset-0 bg-cover bg-center w-full h-full transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                     data-alt="Ultra-high-definition 4K modernist oceanfront sanctuary with infinity pool in Malibu."
+                     style="background-image: url('https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=90&w=3840&auto=format&fit=crop')">
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-6 left-6">
+                  <span class="bg-black/80 backdrop-blur-md text-white text-xs sm:text-sm font-semibold tracking-wider px-3.5 py-1.5 shadow-md border border-white/20">
+                    $22,800,000
+                  </span>
+                </div>
+              </div>
+
+              <!-- Details Below Left Image 2 -->
+              <div class="pt-8 pb-4 flex flex-col">
+                <span class="font-label-caps text-[10px] md:text-xs text-white/60 uppercase tracking-[0.25em] block mb-2">Malibu Coastline, California</span>
+                <h3 class="text-xl md:text-2xl font-bold uppercase tracking-[0.15em] text-white mb-3 heading-reveal leading-snug">
+                  The Pacific Crest Residence
+                </h3>
+                <p class="text-xs md:text-sm text-white/70 tracking-[0.05em] leading-relaxed max-w-xl">
+                  Framed by dramatic coastal bluffs, this modernist sanctuary unites monolithic concrete, seamless floor-to-ceiling glass, and unobstructed 270-degree Pacific horizons.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column (Estate 2 - Positioned Substantially Lower & Larger Size) -->
+          <div class="flex flex-col fade-in-up mt-14 md:mt-72 lg:mt-96 xl:mt-[440px]" style="transition-delay: 0.15s;">
+            <!-- Tall 4K Image (Responsive mobile height, monumental desktop height) -->
+            <div class="relative w-full h-[75vh] min-h-[500px] md:h-[290vh] md:min-h-[2200px] overflow-hidden border border-white/15 group card-hover shadow-sm">
+              <div class="absolute inset-0 bg-cover bg-center w-full h-full transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                   data-alt="Ultra-high-definition 4K luxury cantilevered hillside estate with illuminated terrace at dusk."
+                   style="background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=90&w=3840&auto=format&fit=crop')">
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+              <div class="absolute bottom-6 left-6">
+                <span class="bg-black/80 backdrop-blur-md text-white text-xs sm:text-sm font-semibold tracking-wider px-3.5 py-1.5 shadow-md border border-white/20">
+                  $14,200,000
+                </span>
+              </div>
+            </div>
+
+            <!-- Details Below Right Image -->
+            <div class="pt-8 pb-4 flex flex-col">
+              <span class="font-label-caps text-[10px] md:text-xs text-white/60 uppercase tracking-[0.25em] block mb-2">Beverly Hills Promontory, California</span>
+              <h3 class="text-xl md:text-2xl font-bold uppercase tracking-[0.15em] text-white mb-3 heading-reveal leading-snug">
+                The Skyline Horizon Villa
+              </h3>
+              <p class="text-xs md:text-sm text-white/70 tracking-[0.05em] leading-relaxed max-w-xl">
+                Featuring double-height ceiling voids, bespoke natural walnut finishes, and private infinity-edge water features overlooking the city below.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meet Your Expert (Bento Grid Style with Cinematic Transition) -->
+    <section id="expert" class="py-section-gap-lg px-margin-mobile md:px-margin-desktop bg-surface-container-low border-y border-outline-variant/20 expert-transition-section">
+      <div class="max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-gutter">
+        <div class="md:col-span-5 relative h-[600px] md:h-auto rounded-xl overflow-hidden shadow-sm expert-portrait-container">
+          <div class="absolute inset-0 bg-cover bg-center w-full h-full expert-portrait-img" data-alt="Professional headshot of a confident luxury real estate agent in a tailored navy suit. The background is a slightly blurred modern, high-end office interior with subtle gold lighting accents. The lighting on the subject is crisp and editorial, conveying trust, expertise, and authority." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDoncKk0yeEXl0jZBGlw3p03kEA7OWPS1ycunfg5-VpCPnAmIBhKkpPcfqVVUf9XjXq1eARjdIeP23MWBGeKzvNBQgJVN2z6w3ijkM6fYgih-rxegUwqxMlJurDxplA0CDTMSvioRyS06MdkBj9Ry7OjA3nCp6pW7GChTuUm2i01hnYa2n829tNdQH75dAyuT00p4indEGRa3m6F9trJxfnShXVWKJCljt9pnu0UXRnaYQLCnkN7q06')"></div>
+        </div>
+        <div class="md:col-span-7 flex flex-col justify-center bg-surface p-10 md:p-16 border border-outline-variant/30 rounded-xl shadow-sm expert-card-container">
+          <h4 class="font-label-caps text-label-caps text-secondary mb-6 uppercase tracking-wider heading-reveal">Meet Your Expert</h4>
+          <h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-8 heading-reveal" style="transition-delay: 0.1s;">Eleanor Sterling</h2>
+          <p class="font-body-lg text-body-lg text-on-surface-variant mb-10 leading-relaxed">
+            With over two decades of navigating the ultra-luxury market, Eleanor brings an unparalleled level of discretion, precision, and market acumen to every transaction. Her approach is architectural—building lasting relationships founded on deep trust and exceptional results.
+          </p>
+          <div class="grid grid-cols-2 gap-10 mb-10 border-t border-outline-variant/30 pt-10">
+            <div>
+              <div class="font-display-lg text-headline-xl text-primary mb-2 heading-reveal">$2B+</div>
+              <div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Career Sales</div>
+            </div>
+            <div>
+              <div class="font-display-lg text-headline-xl text-primary mb-2 heading-reveal" style="transition-delay: 0.1s;">Top 1%</div>
+              <div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Global Ranking</div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-6">
+            <a href="#contact" class="font-button text-button bg-primary text-on-primary px-10 py-4 rounded hover:bg-primary/90 transition-colors shadow-md text-center">Schedule Consultation</a>
+            <a href="#contact" class="font-button text-button text-primary border border-outline-variant px-10 py-4 rounded hover:border-primary transition-colors flex items-center justify-center">
+              <span class="material-symbols-outlined mr-3" data-icon="mail">mail</span> Contact
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bespoke Services Section (Award-Winning Editorial Architecture) -->
+    <section id="services" class="py-section-gap-lg px-margin-mobile md:px-margin-desktop bg-background border-t border-outline-variant/30">
+      <div class="max-w-container-max mx-auto">
+        <!-- Editorial Section Intro -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mb-20 items-end">
+          <div class="lg:col-span-7 fade-in-up">
+            <span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.25em] mb-4 block heading-reveal">BESPOKE SERVICES</span>
+            <h2 class="font-headline-xl text-headline-xl text-primary heading-reveal leading-[1.08]">
+              Comprehensive Estate Advisory
+            </h2>
+          </div>
+          <div class="lg:col-span-5 fade-in-up" style="transition-delay: 0.1s;">
+            <p class="text-xs md:text-sm text-on-surface-variant/90 leading-relaxed tracking-[0.03em] max-w-lg">
+              Discreet, fiduciary-grade counsel for ultra-high-net-worth principals, private family offices, and sovereign collectors navigating marquee global acquisitions.
+            </p>
+          </div>
+        </div>
+
+        <!-- Award-Winning Minimalist Editorial Rows -->
+        <div class="border-t border-primary/15 divide-y divide-primary/10">
+          <!-- Advisory Pillar 01 -->
+          <div class="py-10 md:py-14 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-baseline group transition-colors duration-500 hover:bg-surface-variant/50 -mx-4 md:-mx-8 px-4 md:px-8 fade-in-up">
+            <div class="lg:col-span-2 flex items-center space-x-3">
+              <span class="font-mono text-xs md:text-sm text-secondary font-medium tracking-[0.2em]">01</span>
+              <span class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">Acquisitions</span>
+            </div>
+            <div class="lg:col-span-4">
+              <h3 class="text-lg md:text-xl font-bold uppercase tracking-[0.12em] text-primary group-hover:text-secondary transition-colors duration-300 heading-reveal">
+                Off-Market &amp; Sovereign Sourcing
+              </h3>
+            </div>
+            <div class="lg:col-span-5">
+              <p class="text-xs md:text-sm text-on-surface-variant/80 tracking-[0.03em] leading-relaxed opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transform translate-y-0 lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-500 ease-out">
+                Direct fiduciary access to unlisted trophy sanctuaries, historic provenance estates, and discreet private placements before public awareness.
+              </p>
+            </div>
+            <div class="lg:col-span-1 flex justify-start lg:justify-end items-center">
+              <span class="material-symbols-outlined text-primary/30 group-hover:text-secondary group-hover:translate-x-2 transition-all duration-300" style="font-size: 20px;">
+                arrow_outward
+              </span>
+            </div>
+          </div>
+
+          <!-- Advisory Pillar 02 -->
+          <div class="py-10 md:py-14 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-baseline group transition-colors duration-500 hover:bg-surface-variant/50 -mx-4 md:-mx-8 px-4 md:px-8 fade-in-up" style="transition-delay: 0.1s;">
+            <div class="lg:col-span-2 flex items-center space-x-3">
+              <span class="font-mono text-xs md:text-sm text-secondary font-medium tracking-[0.2em]">02</span>
+              <span class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">Provenance</span>
+            </div>
+            <div class="lg:col-span-4">
+              <h3 class="text-lg md:text-xl font-bold uppercase tracking-[0.12em] text-primary group-hover:text-secondary transition-colors duration-300 heading-reveal">
+                Architectural Curation &amp; Pedigree
+              </h3>
+            </div>
+            <div class="lg:col-span-5">
+              <p class="text-xs md:text-sm text-on-surface-variant/80 tracking-[0.03em] leading-relaxed opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transform translate-y-0 lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-500 ease-out">
+                Comprehensive provenance authentication, structural integrity appraisal, and architectural archival valuation for rare modernist and classical masterpieces.
+              </p>
+            </div>
+            <div class="lg:col-span-1 flex justify-start lg:justify-end items-center">
+              <span class="material-symbols-outlined text-primary/30 group-hover:text-secondary group-hover:translate-x-2 transition-all duration-300" style="font-size: 20px;">
+                arrow_outward
+              </span>
+            </div>
+          </div>
+
+          <!-- Advisory Pillar 03 -->
+          <div class="py-10 md:py-14 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-baseline group transition-colors duration-500 hover:bg-surface-variant/50 -mx-4 md:-mx-8 px-4 md:px-8 fade-in-up" style="transition-delay: 0.15s;">
+            <div class="lg:col-span-2 flex items-center space-x-3">
+              <span class="font-mono text-xs md:text-sm text-secondary font-medium tracking-[0.2em]">03</span>
+              <span class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">Divestment</span>
+            </div>
+            <div class="lg:col-span-4">
+              <h3 class="text-lg md:text-xl font-bold uppercase tracking-[0.12em] text-primary group-hover:text-secondary transition-colors duration-300 heading-reveal">
+                Private Global Campaign Marketing
+              </h3>
+            </div>
+            <div class="lg:col-span-5">
+              <p class="text-xs md:text-sm text-on-surface-variant/80 tracking-[0.03em] leading-relaxed opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transform translate-y-0 lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-500 ease-out">
+                Tailored international syndication targeting pre-qualified sovereign wealth entities, tech founders, and private art foundations under stringent non-disclosure.
+              </p>
+            </div>
+            <div class="lg:col-span-1 flex justify-start lg:justify-end items-center">
+              <span class="material-symbols-outlined text-primary/30 group-hover:text-secondary group-hover:translate-x-2 transition-all duration-300" style="font-size: 20px;">
+                arrow_outward
+              </span>
+            </div>
+          </div>
+
+          <!-- Advisory Pillar 04 -->
+          <div class="py-10 md:py-14 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-baseline group transition-colors duration-500 hover:bg-surface-variant/50 -mx-4 md:-mx-8 px-4 md:px-8 fade-in-up" style="transition-delay: 0.2s;">
+            <div class="lg:col-span-2 flex items-center space-x-3">
+              <span class="font-mono text-xs md:text-sm text-secondary font-medium tracking-[0.2em]">04</span>
+              <span class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">Portfolio</span>
+            </div>
+            <div class="lg:col-span-4">
+              <h3 class="text-lg md:text-xl font-bold uppercase tracking-[0.12em] text-primary group-hover:text-secondary transition-colors duration-300 heading-reveal">
+                Capital Preservation &amp; Asset Advisory
+              </h3>
+            </div>
+            <div class="lg:col-span-5">
+              <p class="text-xs md:text-sm text-on-surface-variant/80 tracking-[0.03em] leading-relaxed opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transform translate-y-0 lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-500 ease-out">
+                Strategic wealth preservation modeling, multi-jurisdictional tax structuring coordination, and generational legacy estate asset management.
+              </p>
+            </div>
+            <div class="lg:col-span-1 flex justify-start lg:justify-end items-center">
+              <span class="material-symbols-outlined text-primary/30 group-hover:text-secondary group-hover:translate-x-2 transition-all duration-300" style="font-size: 20px;">
+                arrow_outward
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Minimal Bottom Mandate Bar -->
+        <div class="mt-16 pt-8 border-t border-primary/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 fade-in-up">
+          <div class="flex items-center space-x-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            <span class="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant font-medium">Accepting New Client Mandates by Confidential Referral</span>
+          </div>
+          <a href="#contact" class="font-button text-button bg-primary text-on-primary px-8 py-3.5 hover:bg-primary/90 transition-all shadow-sm text-center inline-flex items-center group">
+            Request Private Consultation
+            <span class="material-symbols-outlined ml-2 transform group-hover:translate-x-1 transition-transform" style="font-size: 18px;">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- Market Intelligence & Quarterly Insights (Award-Winning Editorial Architecture with Architectural Imagery) -->
+    <section id="market-insights" class="py-section-gap-lg px-margin-mobile md:px-margin-desktop bg-black text-white border-t border-white/10">
+      <div class="max-w-container-max mx-auto">
+        <!-- Section Header -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mb-16 items-end">
+          <div class="lg:col-span-7 fade-in-up">
+            <span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.25em] mb-4 block heading-reveal">PROPRIETARY RESEARCH &amp; OUTLOOK</span>
+            <h2 class="font-headline-xl text-headline-xl text-white heading-reveal leading-[1.08]">
+              Market Intelligence &amp; Outlook
+            </h2>
+          </div>
+          <div class="lg:col-span-5 fade-in-up" style="transition-delay: 0.1s;">
+            <p class="text-xs md:text-sm text-white/70 leading-relaxed tracking-[0.03em] max-w-lg">
+              Empirical market liquidity tracking, capital migration analyses, and private off-market valuation metrics synthesized across prime global enclaves.
+            </p>
+          </div>
+        </div>
+
+        <!-- Editorial Architectural Story Layout with Pure Imagery (No Text Over Image) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-20 items-start">
+          <!-- Left Column (Featured Insight 01 - Tall Monumental Image Card) -->
+          <div class="lg:col-span-7 flex flex-col fade-in-up">
+            <!-- 4K Pure Image Container (Responsive mobile, monumental desktop) -->
+            <div class="relative w-full h-[60vh] min-h-[400px] md:h-[140vh] md:min-h-[900px] lg:h-[160vh] lg:min-h-[1100px] overflow-hidden border border-white/15 group card-hover shadow-sm">
+              <div class="absolute inset-0 bg-cover bg-center w-full h-full transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                   data-alt="Modernist luxury architectural villa overlooking infinity pool at sunset."
+                   style="background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=90&w=3840&auto=format&fit=crop')">
+              </div>
+            </div>
+
+            <!-- Narrative Content Below Left Image -->
+            <div class="pt-8 pb-4 flex flex-col">
+              <div class="mb-3">
+                <span class="text-3xl md:text-4xl font-light text-white tracking-tight">+14.8%</span>
+              </div>
+              <h3 class="text-xl md:text-2xl font-bold uppercase tracking-[0.12em] text-white mb-3 heading-reveal leading-snug">
+                Prime Asset Appreciation
+              </h3>
+              <p class="text-xs md:text-sm text-white/70 tracking-[0.03em] leading-relaxed mb-4 max-w-2xl">
+                Annualized capital appreciation recorded across verified hillside and coastal trophy estates, driven by structural supply scarcity and sovereign equity inflows.
+              </p>
+              <div class="flex items-center space-x-2 text-[10px] uppercase tracking-[0.18em] text-secondary font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                <span>Verified Private Transactions · Q3 Audited Registry</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column (Stacked Insights 02 & 03 with Pure Imagery) -->
+          <div class="lg:col-span-5 flex flex-col space-y-12 lg:space-y-16">
+            <!-- Insight 02 (Off-Market Liquidity) -->
+            <div class="flex flex-col fade-in-up" style="transition-delay: 0.1s;">
+              <div class="relative w-full h-[45vh] min-h-[300px] md:h-[70vh] md:min-h-[480px] lg:h-[80vh] lg:min-h-[550px] overflow-hidden border border-white/15 group card-hover shadow-sm">
+                <div class="absolute inset-0 bg-cover bg-center w-full h-full transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                     data-alt="Ultra-luxury architectural interior courtyard with travertine marble and ambient lighting."
+                     style="background-image: url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=90&w=3840&auto=format&fit=crop')">
+                </div>
+              </div>
+
+              <!-- Text Below 02 -->
+              <div class="pt-6 flex flex-col">
+                <div class="mb-2">
+                  <span class="text-2xl md:text-3xl font-light text-white tracking-tight">42%</span>
+                </div>
+                <h4 class="text-lg md:text-xl font-bold uppercase tracking-[0.12em] text-white mb-2 heading-reveal leading-snug">
+                  Off-Market Liquidity
+                </h4>
+                <p class="text-xs text-white/70 tracking-[0.02em] leading-relaxed mb-3">
+                  Total transaction volume above $15M conducted privately under strict non-disclosure covenants, protecting asset integrity and principal anonymity.
+                </p>
+                <div class="flex items-center space-x-2 text-[10px] uppercase tracking-[0.18em] text-secondary font-medium">
+                  <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  <span>Direct Syndicate Placements · Confidential</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Insight 03 (Execution Velocity & Portfolio Value) -->
+            <div class="flex flex-col fade-in-up" style="transition-delay: 0.2s;">
+              <div class="relative w-full h-[45vh] min-h-[300px] md:h-[70vh] md:min-h-[480px] lg:h-[80vh] lg:min-h-[550px] overflow-hidden border border-white/15 group card-hover shadow-sm">
+                <div class="absolute inset-0 bg-cover bg-center w-full h-full transform group-hover:scale-105 transition-transform duration-1000 ease-out"
+                     data-alt="Modern cantilevered oceanfront residence with minimalist infinity terrace."
+                     style="background-image: url('https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=90&w=3840&auto=format&fit=crop')">
+                </div>
+              </div>
+
+              <!-- Text Below 03 -->
+              <div class="pt-6 flex flex-col">
+                <div class="mb-2">
+                  <span class="text-2xl md:text-3xl font-light text-white tracking-tight">18 Days · $4.2B+</span>
+                </div>
+                <h4 class="text-lg md:text-xl font-bold uppercase tracking-[0.12em] text-white mb-2 heading-reveal leading-snug">
+                  Private Execution Velocity
+                </h4>
+                <p class="text-xs text-white/70 tracking-[0.02em] leading-relaxed mb-3">
+                  Average timeline to binding contract execution via direct family office syndicate matching across Beverly Hills, Bel Air, Malibu, and Manhattan.
+                </p>
+                <div class="flex items-center space-x-2 text-[10px] uppercase tracking-[0.18em] text-secondary font-medium">
+                  <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  <span>Pre-Screened Liquidity Pools · Fast Closing</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Award-Winning Minimal Confidential Report Dispatch (Dark Mode Treatment) -->
+        <div class="border border-white/15 p-8 md:p-14 bg-white/[0.04] backdrop-blur-md relative overflow-hidden fade-in-up">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div class="lg:col-span-7">
+              <span class="text-[10px] md:text-[11px] font-mono text-secondary uppercase tracking-[0.25em] block mb-3">CONFIDENTIAL PUBLICATION</span>
+              <h3 class="text-2xl md:text-3xl font-bold uppercase tracking-[0.12em] text-white mb-3 heading-reveal leading-snug">
+                Ultra-Luxury Liquidity &amp; Private Outlook
+              </h3>
+              <p class="text-xs md:text-sm text-white/70 tracking-[0.02em] leading-relaxed max-w-xl">
+                A 36-page proprietary white paper examining confidential off-market deal volume, sovereign capital flows, and macroeconomic tax strategies.
+              </p>
+            </div>
+            <div class="lg:col-span-5">
+              <form onsubmit="event.preventDefault(); alert('Confidential Market Outlook has been dispatched to your email.');" class="flex flex-col sm:flex-row items-stretch gap-3">
+                <input type="email" required placeholder="principal@familyoffice.com" class="w-full px-5 py-3.5 bg-black/70 border border-white/25 text-xs md:text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-white transition-colors">
+                <button type="submit" class="font-button text-button bg-white text-black px-7 py-3.5 hover:bg-white/90 transition-all whitespace-nowrap text-center inline-flex items-center justify-center group shadow-sm">
+                  Request Dispatch
+                  <span class="material-symbols-outlined ml-2 transform group-hover:translate-x-1 transition-transform" style="font-size: 16px;">arrow_forward</span>
+                </button>
+              </form>
+              <div class="mt-3 flex items-center space-x-2 text-[10px] uppercase tracking-[0.18em] text-white/50">
+                <span class="material-symbols-outlined text-secondary" style="font-size: 13px;">lock</span>
+                <span>Encrypted Fiduciary Delivery · Zero Distribution</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Voices of Success (Testimonials) -->
+    <section id="testimonials" class="py-section-gap-lg px-margin-mobile md:px-margin-desktop bg-surface-container-low border-t border-outline-variant/20">
+      <div class="max-w-container-max mx-auto">
+        <div class="text-center mb-16 fade-in-up">
+          <h4 class="font-label-caps text-label-caps text-secondary mb-6 uppercase tracking-wider heading-reveal">HEAR FROM OUR DISCERNING CLIENTELE</h4>
+          <h2 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary heading-reveal" style="transition-delay: 0.1s;">Voices of Success</h2>
+        </div>
+        <div class="flex flex-row overflow-x-auto md:grid md:grid-cols-3 gap-gutter pb-6 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0 md:pb-0 snap-x snap-mandatory no-scrollbar">
+          <!-- Testimonial 1 -->
+          <div class="w-[85vw] max-w-[340px] flex-shrink-0 snap-center md:w-auto md:max-w-none md:flex-shrink bg-surface p-8 sm:p-10 border border-outline-variant/30 rounded-xl flex flex-col items-center text-center card-hover transition-all duration-300 shadow-sm fade-in-up">
+            <div class="w-24 h-24 rounded-full overflow-hidden mb-8 border-2 border-secondary/20 shadow-inner">
+              <div class="w-full h-full bg-surface-container-high flex items-center justify-center">
+                <span class="material-symbols-outlined text-outline" style="font-size: 48px;">person</span>
+              </div>
+            </div>
+            <div class="flex gap-2 mb-6 text-secondary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+            </div>
+            <blockquote class="font-body-lg text-body-lg text-primary mb-8 italic leading-relaxed">
+              "Luxe Legacy provided an unparalleled experience. Their market insight and discretion were exactly what we needed for our estate sale."
+            </blockquote>
+            <cite class="not-italic mt-auto">
+              <div class="font-headline-md text-headline-md text-primary heading-reveal">James &amp; Sarah W.</div>
+              <div class="font-label-caps text-label-caps text-on-surface-variant uppercase mt-2">Bel Air</div>
+            </cite>
+          </div>
+          <!-- Testimonial 2 -->
+          <div class="w-[85vw] max-w-[340px] flex-shrink-0 snap-center md:w-auto md:max-w-none md:flex-shrink bg-surface p-8 sm:p-10 border border-outline-variant/30 rounded-xl flex flex-col items-center text-center card-hover transition-all duration-300 shadow-sm fade-in-up" style="transition-delay: 0.1s;">
+            <div class="w-24 h-24 rounded-full overflow-hidden mb-8 border-2 border-secondary/20 shadow-inner">
+              <div class="w-full h-full bg-surface-container-high flex items-center justify-center">
+                <span class="material-symbols-outlined text-outline" style="font-size: 48px;">person</span>
+              </div>
+            </div>
+            <div class="flex gap-2 mb-6 text-secondary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+            </div>
+            <blockquote class="font-body-lg text-body-lg text-primary mb-8 italic leading-relaxed">
+              "Alexander's attention to detail and negotiation prowess secured us a home we thought was out of reach. Truly the gold standard."
+            </blockquote>
+            <cite class="not-italic mt-auto">
+              <div class="font-headline-md text-headline-md text-primary heading-reveal">David M.</div>
+              <div class="font-label-caps text-label-caps text-on-surface-variant uppercase mt-2">Beverly Hills</div>
+            </cite>
+          </div>
+          <!-- Testimonial 3 -->
+          <div class="w-[85vw] max-w-[340px] flex-shrink-0 snap-center md:w-auto md:max-w-none md:flex-shrink bg-surface p-8 sm:p-10 border border-outline-variant/30 rounded-xl flex flex-col items-center text-center card-hover transition-all duration-300 shadow-sm fade-in-up" style="transition-delay: 0.2s;">
+            <div class="w-24 h-24 rounded-full overflow-hidden mb-8 border-2 border-secondary/20 shadow-inner">
+              <div class="w-full h-full bg-surface-container-high flex items-center justify-center">
+                <span class="material-symbols-outlined text-outline" style="font-size: 48px;">person</span>
+              </div>
+            </div>
+            <div class="flex gap-2 mb-6 text-secondary">
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">star</span>
+            </div>
+            <blockquote class="font-body-lg text-body-lg text-primary mb-8 italic leading-relaxed">
+              "A seamless journey from start to finish. The team's architectural knowledge added so much value to our acquisition."
+            </blockquote>
+            <cite class="not-italic mt-auto">
+              <div class="font-headline-md text-headline-md text-primary heading-reveal">Elena R.</div>
+              <div class="font-label-caps text-label-caps text-on-surface-variant uppercase mt-2">Malibu</div>
+            </cite>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Confidential Inquiry / Private Booking Section -->
+    <section id="contact" class="py-section-gap-lg px-margin-mobile md:px-margin-desktop bg-background">
+      <div class="max-w-container-max mx-auto">
+        <div class="bg-surface border border-outline-variant/30 rounded-3xl p-8 md:p-16 shadow-lg grid grid-cols-1 lg:grid-cols-12 gap-12 fade-in-up">
+          <div class="lg:col-span-5 flex flex-col justify-between">
+            <div>
+              <span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.25em] mb-4 block heading-reveal">PRIVATE CONSULTATION</span>
+              <h2 class="font-headline-xl text-headline-xl text-primary heading-reveal leading-[1.08] mb-6">Begin Your Acquisition Journey</h2>
+              <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-8">
+                Whether seeking to acquire an architectural landmark or discreetly position your estate for sale, our senior advisory team is at your service.
+              </p>
+            </div>
+            <div class="space-y-4 font-body-sm text-body-sm text-on-surface-variant">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-secondary" style="font-size: 20px;">call</span>
+                <span>Direct Office: +1 (310) 890-2400</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-secondary" style="font-size: 20px;">mail</span>
+                <span>Advisory: private@luxelegacy.com</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-secondary" style="font-size: 20px;">location_on</span>
+                <span>Beverly Hills · Bel Air · Malibu · Manhattan</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 bg-surface-container-low p-8 md:p-10 rounded-2xl border border-outline-variant/20">
+            <form onsubmit="event.preventDefault(); alert('Thank you for your inquiry. A senior advisor will contact you confidentially.');" class="space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label class="block font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2">Full Name</label>
+                  <input type="text" required placeholder="e.g. Lord Alexander Vance" class="w-full font-body-sm text-body-sm px-5 py-3.5 rounded-lg bg-surface border border-outline-variant/40 text-primary focus:outline-none focus:border-primary">
+                </div>
+                <div>
+                  <label class="block font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2">Confidential Email</label>
+                  <input type="email" required placeholder="vance@privateoffice.com" class="w-full font-body-sm text-body-sm px-5 py-3.5 rounded-lg bg-surface border border-outline-variant/40 text-primary focus:outline-none focus:border-primary">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label class="block font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2">Target Acquisition Range</label>
+                  <select class="w-full font-body-sm text-body-sm px-5 py-3.5 rounded-lg bg-surface border border-outline-variant/40 text-primary focus:outline-none focus:border-primary">
+                    <option>$5,000,000 – $10,000,000</option>
+                    <option selected>$10,000,000 – $25,000,000</option>
+                    <option>$25,000,000 – $50,000,000</option>
+                    <option>$50,000,000+</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2">Primary Interest</label>
+                  <select class="w-full font-body-sm text-body-sm px-5 py-3.5 rounded-lg bg-surface border border-outline-variant/40 text-primary focus:outline-none focus:border-primary">
+                    <option selected>Private Acquisition</option>
+                    <option>Estate Divestment &amp; Sale</option>
+                    <option>Architectural Appraisal</option>
+                    <option>Portfolio Curation</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2">Confidential Notes / Requirements</label>
+                <textarea rows="3" placeholder="Specify preferred locations, architectural style, or private criteria..." class="w-full font-body-sm text-body-sm px-5 py-3.5 rounded-lg bg-surface border border-outline-variant/40 text-primary focus:outline-none focus:border-primary"></textarea>
+              </div>
+              <button type="submit" class="w-full font-button text-button bg-primary text-on-primary py-4 rounded-lg hover:bg-primary/90 transition-colors shadow-md">
+                Submit Confidential Inquiry
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white w-full overflow-hidden flex flex-col justify-between pt-14 md:pt-20 lg:pt-28 pb-8 md:pb-10 px-4 md:px-12 border-t border-white/10 select-none min-h-[48vh] md:min-h-[60vh]">
+      <!-- Massive Statement Typography (Shifted Left for Full Visibility of Last Letter) -->
+      <div class="w-full text-left sm:text-center flex-1 flex items-center justify-center overflow-hidden py-4 md:py-8 -ml-1 md:-ml-3">
+        <h2 class="footer-reveal-text text-[10.5vw] sm:text-[12vw] md:text-[13.4vw] font-black uppercase tracking-[-0.03em] md:tracking-[-0.035em] leading-[0.85] md:leading-[0.82] text-white whitespace-nowrap flex items-center justify-center">
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.03s;">L</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.07s;">U</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.11s;">X</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.15s;">E</span></span>
+          <span class="footer-char-wrap inline-block w-[3vw]"></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.20s;">L</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.24s;">E</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.28s;">G</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.32s;">A</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.36s;">C</span></span>
+          <span class="footer-char-wrap"><span class="footer-char" style="transition-delay: 0.40s;">Y</span></span>
+        </h2>
+      </div>
+
+      <!-- Bottom Corners (Small Text with Letter Spacing) -->
+      <div class="w-full flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 md:pt-8 border-t border-white/10 text-[10px] md:text-[11px] uppercase tracking-[0.22em] text-white/50 font-medium">
+        <!-- Left Below Corner -->
+        <div>
+          <span>© 2024 LUXE LEGACY · ALL RIGHTS RESERVED</span>
+        </div>
+
+        <!-- Right Below Corner -->
+        <div class="flex items-center space-x-5 md:space-x-8">
+          <a href="#" class="hover:text-white transition-colors duration-300">Privacy Policy</a>
+          <a href="#" class="hover:text-white transition-colors duration-300">Terms of Service</a>
+          <a href="#" class="hover:text-white transition-colors duration-300">Cookie Policy</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // Smooth Performance Scroll Observer
+    function initLuxuryScrollObservers() {
+      const animatedElements = document.querySelectorAll('.heading-reveal, .fade-in-up, .expert-portrait-container, .expert-card-container, .footer-reveal-text');
+      if (!animatedElements.length) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed', 'visible');
+          } else {
+            // Remove when scrolled well out of view so it smoothly re-animates
+            entry.target.classList.remove('revealed', 'visible');
+          }
+        });
+      }, { 
+        threshold: 0.08,
+        rootMargin: '0px 0px -30px 0px'
+      });
+
+      animatedElements.forEach(el => observer.observe(el));
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLuxuryScrollObservers);
+    } else {
+      initLuxuryScrollObservers();
+    }
+  </script>
+
+  <script src="app.js"></script>
+</body>
+</html>

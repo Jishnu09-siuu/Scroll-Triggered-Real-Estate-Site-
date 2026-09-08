@@ -1,0 +1,10 @@
+# Raw heavy source video (exceeds GitHub's 100MB limit; website uses extracted webp frames)
+videoplayback.webm
+
+# Python cache
+__pycache__/
+*.pyc
+
+# System files
+.DS_Store
+Thumbs.db
