@@ -134,7 +134,7 @@ function render(p) {
 // Directional & Predictive Asynchronous Frame Streaming
 const queue = [];
 let activeLoads = 0;
-const MAX_CONCURRENT = 6; // 6 concurrent HTTP/2 streams for rapid preloading without socket stalls
+const MAX_CONCURRENT = 8; // 8 concurrent HTTP/2 multiplexed streams for maximum parallel throughput
 
 function enqueueFrame(idx, highPriority = false) {
   if (idx < 0 || idx >= frameCount || isLoaded[idx]) return;
@@ -184,7 +184,7 @@ function prioritizeAround(currentIndex, direction = 1) {
   processQueue();
 }
 
-const MIN_INITIAL_BUFFER = 12; // Buffer 12 high-density frames in background RAM before revealing canvas
+const MIN_INITIAL_BUFFER = 8; // Buffer 8 continuous frames before split so opening is instant
 let initialBufferLoaded = 0;
 let initialBufferReady = false;
 
@@ -263,14 +263,24 @@ setTimeout(() => {
   }
 }, 1800);
 
-// Intelligent Preload: opening buffer for instant, butter-smooth initial scrubbing
+// Intelligent Preload: continuous opening buffer + distributed keyframe skeleton across Hero sequence
 function initPreloader() {
-  // Preload frame 0 with top priority
-  enqueueFrame(0, true);
-  // Preload opening 40 frames buffer (1..39) for immediate 60-120fps scrubbing from frame 0
-  for (let i = 1; i < Math.min(40, frameCount); i++) {
-    enqueueFrame(i, false);
+  // 1. Continuous opening buffer (frames 0 to 10) for immediate 60fps start
+  for (let i = 0; i <= 10; i++) {
+    enqueueFrame(i, true);
   }
+
+  // 2. Distributed keyframe skeleton covering the entire initial scrub range
+  // Guarantees a decoded frame is ALWAYS available within 5-8 frames of any initial wheel flick!
+  const keyframes = [
+    15, 20, 26, 32, 40, 50, 60, 72, 85, 100, 120, 140, 165, 190, 220, 260, 300
+  ];
+  for (const kf of keyframes) {
+    if (kf < frameCount) {
+      enqueueFrame(kf, false);
+    }
+  }
+
   processQueue();
 }
 
@@ -304,12 +314,12 @@ function onScrollUpdate(scrollY) {
 // Only enable Lenis on desktop pointer devices to preserve native 120fps hardware touch scroll on mobile
 if (!isTouchDevice && typeof Lenis !== 'undefined') {
   lenis = new Lenis({
-    duration: 1.0,
+    duration: 0.7,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     orientation: 'vertical',
     gestureOrientation: 'vertical',
     smoothWheel: true,
-    wheelMultiplier: 1.0,
+    wheelMultiplier: 1.15,
     syncTouch: false,
     infinite: false,
   });
@@ -317,21 +327,16 @@ if (!isTouchDevice && typeof Lenis !== 'undefined') {
   lenis.on('scroll', (e) => {
     onScrollUpdate(e.scroll);
   });
+} else {
+  // Native scroll and touch listeners: active for mobile / touch devices
+  window.addEventListener('scroll', () => {
+    onScrollUpdate(window.scrollY || document.documentElement.scrollTop || 0);
+  }, { passive: true });
+
+  window.addEventListener('touchmove', () => {
+    onScrollUpdate(window.scrollY || document.documentElement.scrollTop || 0);
+  }, { passive: true });
 }
-
-// Native scroll listener: always active as an infallible baseline for mobile & desktop
-window.addEventListener('scroll', () => {
-  const scrollY = (lenis && !isTouchDevice && typeof lenis.scroll === 'number') 
-    ? lenis.scroll 
-    : (window.scrollY || document.documentElement.scrollTop || 0);
-  onScrollUpdate(scrollY);
-}, { passive: true });
-
-// Touchmove listener on mobile for instant scrub response during touch drag
-window.addEventListener('touchmove', () => {
-  const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-  onScrollUpdate(scrollY);
-}, { passive: true });
 
 function mainLoop(time) {
   if (lenis && !isTouchDevice) {
