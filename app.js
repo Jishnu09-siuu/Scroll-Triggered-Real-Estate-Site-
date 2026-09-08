@@ -204,6 +204,8 @@ const MIN_INITIAL_BUFFER = 15; // Buffer 15 continuous opening frames before tri
 let initialBufferLoaded = 0;
 let initialBufferReady = false;
 
+const hasCreateImageBitmap = typeof window.createImageBitmap === 'function';
+
 function processQueue() {
   while (activeLoads < MAX_CONCURRENT && queue.length > 0) {
     const idx = queue.shift();
@@ -212,14 +214,13 @@ function processQueue() {
     }
 
     activeLoads++;
-    const img = new Image();
-    let finished = false;
+    const url = currentFramePath(idx + 1);
 
-    const onFinish = () => {
-      if (finished) return;
-      finished = true;
-      images[idx] = img;
-      isLoaded[idx] = 1;
+    const onFinish = (drawable) => {
+      if (drawable) {
+        images[idx] = drawable;
+        isLoaded[idx] = 1;
+      }
       activeLoads--;
 
       if (!initialBufferReady) {
@@ -237,19 +238,35 @@ function processQueue() {
       processQueue();
     };
 
-    img.src = currentFramePath(idx + 1);
-
-    // Decode on background worker thread to prevent main-thread UI jank
-    if ('decode' in img) {
-      img.decode()
-        .then(onFinish)
+    if (hasCreateImageBitmap) {
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error('Fetch failed');
+          return res.blob();
+        })
+        .then(blob => createImageBitmap(blob))
+        .then(bitmap => onFinish(bitmap))
         .catch(() => {
-          img.onload = onFinish;
-          img.onerror = onFinish;
+          // Transparent fallback to HTMLImageElement
+          const img = new Image();
+          img.onload = () => onFinish(img);
+          img.onerror = () => onFinish(null);
+          img.src = url;
         });
     } else {
-      img.onload = onFinish;
-      img.onerror = onFinish;
+      const img = new Image();
+      let finished = false;
+      const done = () => {
+        if (finished) return;
+        finished = true;
+        onFinish(img);
+      };
+      img.onload = done;
+      img.onerror = () => onFinish(null);
+      img.src = url;
+      if ('decode' in img) {
+        img.decode().then(done).catch(done);
+      }
     }
   }
 }
