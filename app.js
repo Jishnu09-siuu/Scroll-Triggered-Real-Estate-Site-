@@ -21,6 +21,7 @@ let currentProgress = 0;
 let targetProgress = 0;
 let lastRenderedIndex = -1;
 let lastNearestIndex = -1;
+let currentlyDrawnFrameIndex = -1;
 let scrollVelocity = 0;
 let lastProgress = 0;
 let lastProgressTime = performance.now();
@@ -93,8 +94,6 @@ const expertSectionEl = document.getElementById('expert');
 let portraitImgEl = null;
 
 // Fast nearest loaded frame finder (guarantees zero flicker or blank frames with zero latency)
-let currentlyDrawnFrameIndex = -1;
-
 function getNearestLoadedFrameIndex(targetIdx) {
   if (isLoaded[targetIdx]) return targetIdx;
 
