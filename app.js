@@ -48,8 +48,9 @@ let cachedHeroScrollableDistance = 1;
 function resize() {
   if (!canvas || !context) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-  canvasWidth = Math.round(window.innerWidth * dpr);
-  canvasHeight = Math.round(window.innerHeight * dpr);
+  // Cap dimensions to 1920x1080 (native WebP resolution) to eliminate heavy GPU fill-rate overhead
+  canvasWidth = Math.min(1920, Math.round(window.innerWidth * dpr));
+  canvasHeight = Math.min(1080, Math.round(window.innerHeight * dpr));
 
   if (canvas.width !== canvasWidth || canvas.height !== canvasHeight) {
     canvas.width = canvasWidth;
@@ -98,26 +99,31 @@ function handleResize() {
 window.addEventListener('resize', handleResize, { passive: true });
 resize();
 
-// Fast nearest loaded frame finder (guarantees zero flicker or blank frames with zero latency)
+// Fast nearest loaded frame finder (prioritizes backwards search to eliminate forward/backward time-travel jumps)
 function getNearestLoadedFrameIndex(targetIdx) {
   if (isLoaded[targetIdx]) return targetIdx;
 
-  // Search outward from targetIdx for the closest loaded frame
-  for (let r = 1; r < frameCount; r++) {
+  // Search backward first (frames already viewed), then forward
+  for (let r = 1; r <= 30; r++) {
     const left = targetIdx - r;
     if (left >= 0 && isLoaded[left]) return left;
     const right = targetIdx + r;
     if (right < frameCount && isLoaded[right]) return right;
-    if (left < 0 && right >= frameCount) break;
   }
-  return -1;
+
+  // If no neighboring frame is loaded yet, keep currently displayed frame to prevent flashing
+  if (currentlyDrawnFrameIndex >= 0 && isLoaded[currentlyDrawnFrameIndex]) {
+    return currentlyDrawnFrameIndex;
+  }
+
+  return isLoaded[0] ? 0 : -1;
 }
 
 function render(p) {
   if (!canvas || !context) return;
   const targetIndex = Math.min(
     frameCount - 1,
-    Math.max(0, Math.floor(p * (frameCount - 1)))
+    Math.max(0, Math.round(p * (frameCount - 1)))
   );
 
   const bestIdx = getNearestLoadedFrameIndex(targetIndex);
@@ -131,60 +137,70 @@ function render(p) {
   lastRenderedIndex = targetIndex;
 }
 
-// Directional & Predictive Asynchronous Frame Streaming
+// High-Throughput Streamlined Frame Streaming Engine
 const queue = [];
 let activeLoads = 0;
-const MAX_CONCURRENT = 8; // 8 concurrent HTTP/2 multiplexed streams for maximum parallel throughput
+const MAX_CONCURRENT = 8; // Optimal HTTP/2 multiplexed streams
 
-function enqueueFrame(idx, highPriority = false) {
-  if (idx < 0 || idx >= frameCount || isLoaded[idx]) return;
-  if (enqueued[idx]) {
-    if (highPriority) {
-      const existingPos = queue.indexOf(idx);
-      if (existingPos > 0) {
-        queue.splice(existingPos, 1);
-        queue.unshift(idx);
-      }
-    }
-    return;
-  }
-  
+function enqueueFrame(idx) {
+  if (idx < 0 || idx >= frameCount || isLoaded[idx] || enqueued[idx]) return;
   enqueued[idx] = 1;
-  if (highPriority) {
-    queue.unshift(idx);
-  } else {
-    queue.push(idx);
-  }
+  queue.push(idx);
 }
 
 let lastPrioritizedIndex = -1;
 function prioritizeAround(currentIndex, direction = 1) {
-  if (Math.abs(currentIndex - lastPrioritizedIndex) < 1) return;
+  if (Math.abs(currentIndex - lastPrioritizedIndex) < 2) return;
   lastPrioritizedIndex = currentIndex;
 
-  const lookAhead = 35;
-  const lookBehind = 8;
+  const lookAhead = 45;
+  const lookBehind = 10;
+  const urgent = [];
 
   if (direction >= 0) {
-    // Unshift in reverse so currentIndex and immediate next frames are at the HEAD of the queue
-    for (let i = lookAhead; i >= 0; i--) {
-      enqueueFrame(currentIndex + i, true);
+    for (let i = 0; i <= lookAhead; i++) {
+      const idx = currentIndex + i;
+      if (idx < frameCount && !isLoaded[idx]) {
+        urgent.push(idx);
+        enqueued[idx] = 1;
+      }
     }
     for (let i = 1; i <= lookBehind; i++) {
-      enqueueFrame(currentIndex - i, false);
+      const idx = currentIndex - i;
+      if (idx >= 0 && !isLoaded[idx]) {
+        urgent.push(idx);
+        enqueued[idx] = 1;
+      }
     }
   } else {
-    for (let i = lookAhead; i >= 0; i--) {
-      enqueueFrame(currentIndex - i, true);
+    for (let i = 0; i <= lookAhead; i++) {
+      const idx = currentIndex - i;
+      if (idx >= 0 && !isLoaded[idx]) {
+        urgent.push(idx);
+        enqueued[idx] = 1;
+      }
     }
     for (let i = 1; i <= lookBehind; i++) {
-      enqueueFrame(currentIndex + i, false);
+      const idx = currentIndex + i;
+      if (idx < frameCount && !isLoaded[idx]) {
+        urgent.push(idx);
+        enqueued[idx] = 1;
+      }
     }
   }
+
+  // Prepend urgent unloaded frames to the head of the queue without duplicates
+  if (urgent.length > 0) {
+    const urgentSet = new Set(urgent);
+    const remaining = queue.filter(idx => !urgentSet.has(idx) && !isLoaded[idx]);
+    queue.length = 0;
+    queue.push(...urgent, ...remaining);
+  }
+
   processQueue();
 }
 
-const MIN_INITIAL_BUFFER = 6; // Buffer frame 0 + first 5 keyframes in background RAM before revealing canvas
+const MIN_INITIAL_BUFFER = 15; // Buffer 15 continuous opening frames before triggering slat split
 let initialBufferLoaded = 0;
 let initialBufferReady = false;
 
@@ -208,7 +224,7 @@ function processQueue() {
 
       if (!initialBufferReady) {
         initialBufferLoaded++;
-        if (idx === 0) {
+        if (idx === 0 && currentlyDrawnFrameIndex < 0) {
           render(0);
         }
         if (initialBufferLoaded >= MIN_INITIAL_BUFFER) {
@@ -217,13 +233,13 @@ function processQueue() {
         }
       }
 
-      render(currentProgress);
+      // Keep downloads moving; frame rendering is strictly managed by mainLoop RAF
       processQueue();
     };
 
     img.src = currentFramePath(idx + 1);
 
-    // Decode strictly on background worker thread to prevent main-thread UI jank
+    // Decode on background worker thread to prevent main-thread UI jank
     if ('decode' in img) {
       img.decode()
         .then(onFinish)
@@ -256,25 +272,27 @@ function triggerLoaderSplit() {
   }, 2200);
 }
 
-// Fallback trigger so slow 3G networks never get stuck
+// Fallback trigger so slower networks never get stuck
 setTimeout(() => {
   if (!loaderTriggered) {
     triggerLoaderSplit();
   }
-}, 1800);
+}, 2000);
 
-// Intelligent Preload: continuous opening buffer + distributed keyframe skeleton across Hero sequence
+// Dense contiguous opening preload: guaranteed zero-lag initial scroll experience
 function initPreloader() {
-  // Pre-load frames in exact ascending priority:
-  // 1. Continuous opening buffer (frames 0 to 12) for smooth start
-  // 2. Distributed keyframe skeleton (every 4-8 frames across opening sequence)
-  const initialSequence = [
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-    16, 20, 24, 28, 32, 36, 40, 45, 50, 56, 62, 70, 80, 90, 100, 115, 130, 150, 175, 200
-  ];
+  // Pre-load frames 0 to 45 in unbroken consecutive order so initial scroll never encounters missing frames
+  const initialSequence = [];
+  for (let i = 0; i <= 45; i++) {
+    initialSequence.push(i);
+  }
+  // Followed by distributed skeleton across the rest of the hero sequence
+  for (let i = 50; i <= 240; i += 6) {
+    initialSequence.push(i);
+  }
 
   for (const idx of initialSequence) {
-    if (idx < frameCount && !enqueued[idx] && !isLoaded[idx]) {
+    if (idx < frameCount && !isLoaded[idx]) {
       enqueued[idx] = 1;
       queue.push(idx);
     }
@@ -293,11 +311,10 @@ function calculateHeroProgress(scrollY) {
 
 // High-Performance Unified Scroll Engine (Mobile Touch-Optimized + Desktop Momentum)
 let lenis = null;
-const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 768);
+const isTouchDevice = ('ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches) || (window.innerWidth <= 768);
 
 function onScrollUpdate(scrollY) {
   targetProgress = calculateHeroProgress(scrollY);
-  currentProgress = targetProgress;
   
   const now = performance.now();
   const dt = Math.max(1, now - lastProgressTime);
@@ -310,15 +327,15 @@ function onScrollUpdate(scrollY) {
   prioritizeAround(currentIdx, scrollVelocity >= 0 ? 1 : -1);
 }
 
-// Only enable Lenis on desktop pointer devices to preserve native 120fps hardware touch scroll on mobile
-if (!isTouchDevice && typeof Lenis !== 'undefined') {
+// Enable Lenis with smoothWheel for mouse and trackpad devices
+if (typeof Lenis !== 'undefined') {
   lenis = new Lenis({
-    duration: 0.7,
+    duration: 0.8,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     orientation: 'vertical',
     gestureOrientation: 'vertical',
     smoothWheel: true,
-    wheelMultiplier: 1.15,
+    wheelMultiplier: 1.0,
     syncTouch: false,
     infinite: false,
   });
@@ -326,28 +343,34 @@ if (!isTouchDevice && typeof Lenis !== 'undefined') {
   lenis.on('scroll', (e) => {
     onScrollUpdate(e.scroll);
   });
-} else {
-  // Native scroll and touch listeners: active for mobile / touch devices
-  window.addEventListener('scroll', () => {
-    onScrollUpdate(window.scrollY || document.documentElement.scrollTop || 0);
-  }, { passive: true });
-
-  window.addEventListener('touchmove', () => {
-    onScrollUpdate(window.scrollY || document.documentElement.scrollTop || 0);
-  }, { passive: true });
 }
 
+// Native scroll listener as universal safety/fallback
+window.addEventListener('scroll', () => {
+  if (!lenis || isTouchDevice) {
+    onScrollUpdate(window.scrollY || document.documentElement.scrollTop || 0);
+  }
+}, { passive: true });
+
 function mainLoop(time) {
-  if (lenis && !isTouchDevice) {
+  if (lenis) {
     lenis.raf(time);
   }
 
-  const currentScroll = (lenis && !isTouchDevice && typeof lenis.scroll === 'number')
+  const currentScroll = (lenis && typeof lenis.scroll === 'number')
     ? lenis.scroll
     : (window.scrollY || document.documentElement.scrollTop || 0);
 
   targetProgress = calculateHeroProgress(currentScroll);
-  currentProgress = targetProgress;
+
+  // High-precision smooth exponential dampening (frame-rate independent 60/120fps glide)
+  const diff = targetProgress - currentProgress;
+  if (Math.abs(diff) < 0.00001) {
+    currentProgress = targetProgress;
+  } else {
+    currentProgress += diff * 0.16;
+  }
+
   render(currentProgress);
 
   updateHeroLogo(currentScroll);

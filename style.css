@@ -119,6 +119,7 @@ canvas {
   pointer-events: none;
   z-index: 1;
   opacity: 1;
+  transform: translateZ(0);
 }
 
 body.hero-loaded canvas {
