@@ -117,15 +117,12 @@ canvas {
   background-color: #030303;
   display: block;
   pointer-events: none;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  will-change: transform;
   z-index: 1;
   opacity: 1;
 }
 
 body.hero-loaded canvas {
-  transform: translate3d(0, 0, 0);
+  opacity: 1;
 }
 
 /* Top Right Menu Bar Entrance */

@@ -4,7 +4,7 @@ const canvas = document.getElementById('canvas');
 let context = null;
 if (canvas) {
   try {
-    context = canvas.getContext('2d', { alpha: false, desynchronized: true }) || canvas.getContext('2d');
+    context = canvas.getContext('2d', { alpha: false }) || canvas.getContext('2d');
   } catch (e) {
     context = canvas.getContext('2d');
   }
@@ -57,7 +57,7 @@ function resize() {
   }
 
   context.imageSmoothingEnabled = true;
-  context.imageSmoothingQuality = 'medium';
+  context.imageSmoothingQuality = 'low';
 
   const cRatio = canvasWidth / canvasHeight;
   if (cRatio > imgRatio) {
@@ -184,7 +184,7 @@ function prioritizeAround(currentIndex, direction = 1) {
   processQueue();
 }
 
-const MIN_INITIAL_BUFFER = 8; // Buffer 8 continuous frames before split so opening is instant
+const MIN_INITIAL_BUFFER = 6; // Buffer frame 0 + first 5 keyframes in background RAM before revealing canvas
 let initialBufferLoaded = 0;
 let initialBufferReady = false;
 
@@ -265,19 +265,18 @@ setTimeout(() => {
 
 // Intelligent Preload: continuous opening buffer + distributed keyframe skeleton across Hero sequence
 function initPreloader() {
-  // 1. Continuous opening buffer (frames 0 to 10) for immediate 60fps start
-  for (let i = 0; i <= 10; i++) {
-    enqueueFrame(i, true);
-  }
-
-  // 2. Distributed keyframe skeleton covering the entire initial scrub range
-  // Guarantees a decoded frame is ALWAYS available within 5-8 frames of any initial wheel flick!
-  const keyframes = [
-    15, 20, 26, 32, 40, 50, 60, 72, 85, 100, 120, 140, 165, 190, 220, 260, 300
+  // Pre-load frames in exact ascending priority:
+  // 1. Continuous opening buffer (frames 0 to 12) for smooth start
+  // 2. Distributed keyframe skeleton (every 4-8 frames across opening sequence)
+  const initialSequence = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    16, 20, 24, 28, 32, 36, 40, 45, 50, 56, 62, 70, 80, 90, 100, 115, 130, 150, 175, 200
   ];
-  for (const kf of keyframes) {
-    if (kf < frameCount) {
-      enqueueFrame(kf, false);
+
+  for (const idx of initialSequence) {
+    if (idx < frameCount && !enqueued[idx] && !isLoaded[idx]) {
+      enqueued[idx] = 1;
+      queue.push(idx);
     }
   }
 
