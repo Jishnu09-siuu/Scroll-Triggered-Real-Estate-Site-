@@ -1,0 +1,11 @@
+# Exclude raw 122MB source video exceeding Vercel's 100MB single-file limit
+videoplayback.webm
+
+# Python scripts and cache
+extract_frames.py
+__pycache__/
+*.pyc
+
+# Git
+.git
+.gitignore
