@@ -62,6 +62,7 @@ function resize() {
   }
 
   lastRenderedIndex = -1;
+  currentlyDrawnFrameIndex = -1;
   render(currentProgress);
 }
 
@@ -262,10 +263,27 @@ function calculateHeroProgress(scrollY) {
   return Math.min(1, Math.max(0, scrollY / heroScrollableDistance));
 }
 
-// Smooth Momentum Scroll Engine (Lenis)
+// High-Performance Unified Scroll Engine (Mobile Touch-Optimized + Desktop Momentum)
 let lenis = null;
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 768);
 
-if (typeof Lenis !== 'undefined') {
+function onScrollUpdate(scrollY) {
+  targetProgress = calculateHeroProgress(scrollY);
+  currentProgress = targetProgress;
+  
+  const now = performance.now();
+  const dt = Math.max(1, now - lastProgressTime);
+  const dp = targetProgress - lastProgress;
+  scrollVelocity = dp / dt;
+  lastProgress = targetProgress;
+  lastProgressTime = now;
+
+  const currentIdx = Math.floor(targetProgress * (frameCount - 1));
+  prioritizeAround(currentIdx, scrollVelocity >= 0 ? 1 : -1);
+}
+
+// Only enable Lenis on desktop pointer devices to preserve native 120fps hardware touch scroll on mobile
+if (!isTouchDevice && typeof Lenis !== 'undefined') {
   lenis = new Lenis({
     duration: 1.0,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -273,68 +291,51 @@ if (typeof Lenis !== 'undefined') {
     gestureOrientation: 'vertical',
     smoothWheel: true,
     wheelMultiplier: 1.0,
-    touchMultiplier: 1.0,
-    syncTouch: true,
+    syncTouch: false,
     infinite: false,
   });
 
   lenis.on('scroll', (e) => {
-    targetProgress = calculateHeroProgress(e.scroll);
-    
-    const now = performance.now();
-    const dt = Math.max(1, now - lastProgressTime);
-    const dp = targetProgress - lastProgress;
-    scrollVelocity = dp / dt;
-    lastProgress = targetProgress;
-    lastProgressTime = now;
-
-    const currentIdx = Math.floor(targetProgress * (frameCount - 1));
-    prioritizeAround(currentIdx, scrollVelocity >= 0 ? 1 : -1);
+    onScrollUpdate(e.scroll);
   });
-
-  function raf(time) {
-    lenis.raf(time);
-    
-    // Direct synchronization: Lenis already handles smooth momentum physics at 60/120fps.
-    // Eliminating secondary lerp removes the 3-5s initial drag/lag completely.
-    currentProgress = targetProgress;
-    render(currentProgress);
-
-    const currentScroll = lenis.scroll || window.scrollY || 0;
-    updateHeroLogo(currentScroll);
-    updateHeroHouseText(currentScroll);
-    updateHeroBlur(currentScroll);
-    updateHeroNav(currentScroll);
-    updateExpertParallax(currentScroll);
-
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
-} else {
-  // Fallback native scroll listener
-  window.addEventListener('scroll', () => {
-    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-    targetProgress = calculateHeroProgress(scrollTop);
-
-    const currentIdx = Math.floor(targetProgress * (frameCount - 1));
-    prioritizeAround(currentIdx, 1);
-  }, { passive: true });
-
-  function fallbackLoop() {
-    currentProgress = targetProgress;
-    render(currentProgress);
-
-    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-    updateHeroLogo(scrollTop);
-    updateHeroHouseText(scrollTop);
-    updateHeroBlur(scrollTop);
-    updateHeroNav(scrollTop);
-    updateExpertParallax(scrollTop);
-
-    requestAnimationFrame(fallbackLoop);
-  }
-  requestAnimationFrame(fallbackLoop);
 }
+
+// Native scroll listener: always active as an infallible baseline for mobile & desktop
+window.addEventListener('scroll', () => {
+  const scrollY = (lenis && !isTouchDevice && typeof lenis.scroll === 'number') 
+    ? lenis.scroll 
+    : (window.scrollY || document.documentElement.scrollTop || 0);
+  onScrollUpdate(scrollY);
+}, { passive: true });
+
+// Touchmove listener on mobile for instant scrub response during touch drag
+window.addEventListener('touchmove', () => {
+  const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+  onScrollUpdate(scrollY);
+}, { passive: true });
+
+function mainLoop(time) {
+  if (lenis && !isTouchDevice) {
+    lenis.raf(time);
+  }
+
+  const currentScroll = (lenis && !isTouchDevice && typeof lenis.scroll === 'number')
+    ? lenis.scroll
+    : (window.scrollY || document.documentElement.scrollTop || 0);
+
+  targetProgress = calculateHeroProgress(currentScroll);
+  currentProgress = targetProgress;
+  render(currentProgress);
+
+  updateHeroLogo(currentScroll);
+  updateHeroHouseText(currentScroll);
+  updateHeroBlur(currentScroll);
+  updateHeroNav(currentScroll);
+  updateExpertParallax(currentScroll);
+
+  requestAnimationFrame(mainLoop);
+}
+requestAnimationFrame(mainLoop);
 
 // Handle entrance animation completion before scroll take-over
 let entranceFinished = false;
