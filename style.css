@@ -119,23 +119,22 @@ canvas {
   background-color: #030303;
   display: block;
   pointer-events: none;
-  transform: translate3d(0, 0, 0) scale(1.0);
+  transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  will-change: transform, opacity;
+  will-change: transform;
   z-index: 1;
   opacity: 1;
-  transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.hero-loaded canvas {
-  transform: translate3d(0, 0, 0) scale(1.05);
+  transform: translate3d(0, 0, 0);
 }
 
 /* Top Right Menu Bar Entrance */
 #topNav {
   opacity: 0;
   transform: translateY(-24px);
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.9s, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.9s;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
   will-change: transform, opacity;
 }
 
@@ -166,7 +165,7 @@ body.hero-loaded #topNav {
 #heroLogo {
   opacity: 0;
   transform: translateY(36px);
-  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.1s, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.1s;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
   will-change: transform, opacity;
 }
 

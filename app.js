@@ -92,38 +92,20 @@ const expertSectionEl = document.getElementById('expert');
 let portraitImgEl = null;
 
 // Fast nearest loaded frame finder (guarantees zero flicker or blank frames with zero latency)
-function getNearestFrame(targetIdx) {
-  if (isLoaded[targetIdx]) {
-    lastNearestIndex = targetIdx;
-    return images[targetIdx];
-  }
+let currentlyDrawnFrameIndex = -1;
 
-  // Fast path: previously rendered frame is an immediate zero-overhead fallback
-  if (lastNearestIndex >= 0 && images[lastNearestIndex]) {
-    // Check narrow immediate window (+/- 8 frames) for a closer match
-    for (let r = 1; r <= 8; r++) {
-      const left = targetIdx - r;
-      if (left >= 0 && isLoaded[left]) {
-        lastNearestIndex = left;
-        return images[left];
-      }
-      const right = targetIdx + r;
-      if (right < frameCount && isLoaded[right]) {
-        lastNearestIndex = right;
-        return images[right];
-      }
-    }
-    return images[lastNearestIndex];
-  }
+function getNearestLoadedFrameIndex(targetIdx) {
+  if (isLoaded[targetIdx]) return targetIdx;
 
-  // Global nearest fallback for initial frame discovery
-  for (let i = 0; i < frameCount; i++) {
-    if (isLoaded[i]) {
-      lastNearestIndex = i;
-      return images[i];
-    }
+  // Search outward from targetIdx for the closest loaded frame
+  for (let r = 1; r < frameCount; r++) {
+    const left = targetIdx - r;
+    if (left >= 0 && isLoaded[left]) return left;
+    const right = targetIdx + r;
+    if (right < frameCount && isLoaded[right]) return right;
+    if (left < 0 && right >= frameCount) break;
   }
-  return null;
+  return -1;
 }
 
 function render(p) {
@@ -133,19 +115,21 @@ function render(p) {
     Math.max(0, Math.floor(p * (frameCount - 1)))
   );
 
-  if (targetIndex === lastRenderedIndex) return;
+  const bestIdx = getNearestLoadedFrameIndex(targetIndex);
+  if (bestIdx < 0 || !images[bestIdx]) return;
 
-  const img = getNearestFrame(targetIndex);
-  if (!img) return;
+  // Avoid re-drawing if the canvas already displays this exact image
+  if (bestIdx === currentlyDrawnFrameIndex) return;
 
-  context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  context.drawImage(images[bestIdx], offsetX, offsetY, drawWidth, drawHeight);
+  currentlyDrawnFrameIndex = bestIdx;
   lastRenderedIndex = targetIndex;
 }
 
 // Directional & Predictive Asynchronous Frame Streaming
 const queue = [];
 let activeLoads = 0;
-const MAX_CONCURRENT = 4; // 4 concurrent connections avoids socket saturation and lets scroll frames load instantly
+const MAX_CONCURRENT = 6; // 6 concurrent HTTP/2 streams for rapid preloading without socket stalls
 
 function enqueueFrame(idx, highPriority = false) {
   if (idx < 0 || idx >= frameCount || isLoaded[idx]) return;
@@ -170,22 +154,22 @@ function enqueueFrame(idx, highPriority = false) {
 
 let lastPrioritizedIndex = -1;
 function prioritizeAround(currentIndex, direction = 1) {
-  // Throttle queue reordering if scrub hasn't moved by at least 2 frames
-  if (Math.abs(currentIndex - lastPrioritizedIndex) < 2) return;
+  if (Math.abs(currentIndex - lastPrioritizedIndex) < 1) return;
   lastPrioritizedIndex = currentIndex;
 
-  const lookAhead = 25;
-  const lookBehind = 6;
+  const lookAhead = 35;
+  const lookBehind = 8;
 
   if (direction >= 0) {
-    for (let i = 0; i <= lookAhead; i++) {
+    // Unshift in reverse so currentIndex and immediate next frames are at the HEAD of the queue
+    for (let i = lookAhead; i >= 0; i--) {
       enqueueFrame(currentIndex + i, true);
     }
     for (let i = 1; i <= lookBehind; i++) {
       enqueueFrame(currentIndex - i, false);
     }
   } else {
-    for (let i = 0; i <= lookAhead; i++) {
+    for (let i = lookAhead; i >= 0; i--) {
       enqueueFrame(currentIndex - i, true);
     }
     for (let i = 1; i <= lookBehind; i++) {
@@ -214,9 +198,9 @@ function processQueue() {
       activeLoads--;
 
       if (idx === 0 || lastRenderedIndex === -1) {
-        render(currentProgress);
         triggerLoaderSplit();
       }
+      render(currentProgress);
       processQueue();
     };
 
@@ -237,18 +221,15 @@ function triggerLoaderSplit() {
   loaderTriggered = true;
   
   const loader = document.getElementById('whiteLoader');
+  if (loader) loader.classList.add('split');
+  document.body.classList.add('hero-loaded');
   
   setTimeout(() => {
-    if (loader) loader.classList.add('split');
-    document.body.classList.add('hero-loaded');
-    
-    setTimeout(() => {
-      if (loader) {
-        loader.classList.add('loader-done');
-        loader.style.display = 'none';
-      }
-    }, 2200);
-  }, 120);
+    if (loader) {
+      loader.classList.add('loader-done');
+      loader.style.display = 'none';
+    }
+  }, 2200);
 }
 
 // Fallback trigger in case frame 0 takes longer than expected to download
@@ -259,8 +240,10 @@ setTimeout(triggerLoaderSplit, 800);
 
 // Intelligent Preload: opening buffer for instant, butter-smooth initial scrubbing
 function initPreloader() {
-  // Preload opening 25 frames buffer (0..24) for immediate 60-120fps scrubbing from frame 0
-  for (let i = 0; i < Math.min(25, frameCount); i++) {
+  // Preload frame 0 with top priority
+  enqueueFrame(0, true);
+  // Preload opening 35 frames buffer (1..34) for immediate 60-120fps scrubbing from frame 0
+  for (let i = 1; i < Math.min(35, frameCount); i++) {
     enqueueFrame(i, false);
   }
   processQueue();
@@ -309,16 +292,12 @@ if (typeof Lenis !== 'undefined') {
     prioritizeAround(currentIdx, scrollVelocity >= 0 ? 1 : -1);
   });
 
-  let lastTime = performance.now();
   function raf(time) {
-    const dt = Math.min(33, Math.max(1, time - lastTime));
-    lastTime = time;
-
     lenis.raf(time);
     
-    // Delta-time aware smooth exponential interpolation
-    const lerpFactor = 1 - Math.exp(-18 * (dt / 1000));
-    currentProgress += (targetProgress - currentProgress) * lerpFactor;
+    // Direct synchronization: Lenis already handles smooth momentum physics at 60/120fps.
+    // Eliminating secondary lerp removes the 3-5s initial drag/lag completely.
+    currentProgress = targetProgress;
     render(currentProgress);
 
     const currentScroll = lenis.scroll || window.scrollY || 0;
@@ -341,13 +320,8 @@ if (typeof Lenis !== 'undefined') {
     prioritizeAround(currentIdx, 1);
   }, { passive: true });
 
-  let lastTime = performance.now();
-  function fallbackLoop(time) {
-    const dt = Math.min(33, Math.max(1, time - lastTime));
-    lastTime = time;
-
-    const lerpFactor = 1 - Math.exp(-18 * (dt / 1000));
-    currentProgress += (targetProgress - currentProgress) * lerpFactor;
+  function fallbackLoop() {
+    currentProgress = targetProgress;
     render(currentProgress);
 
     const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
