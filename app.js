@@ -83,33 +83,40 @@ function handleResize() {
 window.addEventListener('resize', handleResize, { passive: true });
 resize();
 
-// Fast nearest loaded frame finder (guarantees zero flicker or blank frames)
+// Cached DOM element references to eliminate high-frequency layout queries
+const heroEl = document.getElementById('hero');
+const logoEl = document.getElementById('heroLogo');
+const houseTextEl = document.getElementById('heroHouseText');
+const navEl = document.getElementById('topNav');
+const expertSectionEl = document.getElementById('expert');
+let portraitImgEl = null;
+
+// Fast nearest loaded frame finder (guarantees zero flicker or blank frames with zero latency)
 function getNearestFrame(targetIdx) {
   if (isLoaded[targetIdx]) {
     lastNearestIndex = targetIdx;
     return images[targetIdx];
   }
 
-  const maxRadius = 80;
-  for (let r = 1; r <= maxRadius; r++) {
-    const left = targetIdx - r;
-    if (left >= 0 && isLoaded[left]) {
-      lastNearestIndex = left;
-      return images[left];
-    }
-    const right = targetIdx + r;
-    if (right < frameCount && isLoaded[right]) {
-      lastNearestIndex = right;
-      return images[right];
-    }
-  }
-
-  // Fall back to previously rendered frame if available
+  // Fast path: previously rendered frame is an immediate zero-overhead fallback
   if (lastNearestIndex >= 0 && images[lastNearestIndex]) {
+    // Check narrow immediate window (+/- 8 frames) for a closer match
+    for (let r = 1; r <= 8; r++) {
+      const left = targetIdx - r;
+      if (left >= 0 && isLoaded[left]) {
+        lastNearestIndex = left;
+        return images[left];
+      }
+      const right = targetIdx + r;
+      if (right < frameCount && isLoaded[right]) {
+        lastNearestIndex = right;
+        return images[right];
+      }
+    }
     return images[lastNearestIndex];
   }
 
-  // Global nearest fallback
+  // Global nearest fallback for initial frame discovery
   for (let i = 0; i < frameCount; i++) {
     if (isLoaded[i]) {
       lastNearestIndex = i;
@@ -138,13 +145,12 @@ function render(p) {
 // Directional & Predictive Asynchronous Frame Streaming
 const queue = [];
 let activeLoads = 0;
-const MAX_CONCURRENT = 6; // Optimal for HTTP pipeline and UI thread decoding
+const MAX_CONCURRENT = 4; // 4 concurrent connections avoids socket saturation and lets scroll frames load instantly
 
 function enqueueFrame(idx, highPriority = false) {
   if (idx < 0 || idx >= frameCount || isLoaded[idx]) return;
   if (enqueued[idx]) {
     if (highPriority) {
-      // Move to front if already in queue but now high priority
       const existingPos = queue.indexOf(idx);
       if (existingPos > 0) {
         queue.splice(existingPos, 1);
@@ -160,12 +166,16 @@ function enqueueFrame(idx, highPriority = false) {
   } else {
     queue.push(idx);
   }
-  processQueue();
 }
 
+let lastPrioritizedIndex = -1;
 function prioritizeAround(currentIndex, direction = 1) {
-  const lookAhead = 40;
-  const lookBehind = 15;
+  // Throttle queue reordering if scrub hasn't moved by at least 2 frames
+  if (Math.abs(currentIndex - lastPrioritizedIndex) < 2) return;
+  lastPrioritizedIndex = currentIndex;
+
+  const lookAhead = 25;
+  const lookBehind = 6;
 
   if (direction >= 0) {
     for (let i = 0; i <= lookAhead; i++) {
@@ -182,6 +192,7 @@ function prioritizeAround(currentIndex, direction = 1) {
       enqueueFrame(currentIndex + i, false);
     }
   }
+  processQueue();
 }
 
 function processQueue() {
@@ -246,28 +257,24 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 setTimeout(triggerLoaderSplit, 800);
 
-// Intelligent Preload: opening sequence and light keyframe scaffolding
+// Intelligent Preload: opening buffer for instant, butter-smooth initial scrubbing
 function initPreloader() {
-  // Priority 1: Opening 35 frames in sequential order
-  for (let i = 0; i < Math.min(35, frameCount); i++) {
+  // Preload opening 25 frames buffer (0..24) for immediate 60-120fps scrubbing from frame 0
+  for (let i = 0; i < Math.min(25, frameCount); i++) {
     enqueueFrame(i, false);
   }
-  // Priority 2: Keyframe skeleton every 12 frames across timeline (background streaming)
-  for (let i = 35; i < frameCount; i += 12) {
-    enqueueFrame(i, false);
-  }
+  processQueue();
 }
 
 initPreloader();
 
 // Calculate scroll progress exclusively across the Hero sequence track
 function calculateHeroProgress(scrollY) {
-  const hero = document.getElementById('hero');
-  if (!hero) {
+  if (!heroEl) {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     return maxScroll > 0 ? scrollY / maxScroll : 0;
   }
-  const heroScrollableDistance = hero.offsetHeight - window.innerHeight;
+  const heroScrollableDistance = heroEl.offsetHeight - window.innerHeight;
   if (heroScrollableDistance <= 0) return 0;
   return Math.min(1, Math.max(0, scrollY / heroScrollableDistance));
 }
@@ -319,7 +326,7 @@ if (typeof Lenis !== 'undefined') {
     updateHeroHouseText(currentScroll);
     updateHeroBlur(currentScroll);
     updateHeroNav(currentScroll);
-    updateExpertParallax();
+    updateExpertParallax(currentScroll);
 
     requestAnimationFrame(raf);
   }
@@ -348,7 +355,7 @@ if (typeof Lenis !== 'undefined') {
     updateHeroHouseText(scrollTop);
     updateHeroBlur(scrollTop);
     updateHeroNav(scrollTop);
-    updateExpertParallax();
+    updateExpertParallax(scrollTop);
 
     requestAnimationFrame(fallbackLoop);
   }
@@ -359,21 +366,19 @@ if (typeof Lenis !== 'undefined') {
 let entranceFinished = false;
 setTimeout(() => {
   entranceFinished = true;
-  const logo = document.getElementById('heroLogo');
-  if (logo) logo.style.transition = 'none';
+  if (logoEl) logoEl.style.transition = 'none';
 }, 2200);
 
 // Continuous scroll upward movement for hero logo
 let lastLogoTranslateY = null;
 let lastLogoOpacity = null;
 function updateHeroLogo(scrollY) {
-  const logo = document.getElementById('heroLogo');
-  if (!logo) return;
+  if (!logoEl) return;
   if (!entranceFinished && scrollY === 0) return;
   
   if (!entranceFinished && scrollY > 0) {
     entranceFinished = true;
-    logo.style.transition = 'none';
+    logoEl.style.transition = 'none';
   }
   
   const translateY = Math.round(-scrollY * 1.4);
@@ -382,9 +387,9 @@ function updateHeroLogo(scrollY) {
   if (translateY !== lastLogoTranslateY || opacity !== lastLogoOpacity) {
     lastLogoTranslateY = translateY;
     lastLogoOpacity = opacity;
-    logo.style.transform = `translate3d(0px, ${translateY}px, 0px)`;
-    logo.style.opacity = `${opacity}`;
-    logo.style.pointerEvents = opacity <= 0.05 ? 'none' : 'auto';
+    logoEl.style.transform = `translate3d(0px, ${translateY}px, 0px)`;
+    logoEl.style.opacity = `${opacity}`;
+    logoEl.style.pointerEvents = opacity <= 0.05 ? 'none' : 'auto';
   }
 }
 
@@ -392,11 +397,9 @@ function updateHeroLogo(scrollY) {
 let lastHouseTranslateY = null;
 let lastHouseOpacity = null;
 function updateHeroHouseText(scrollY) {
-  const houseText = document.getElementById('heroHouseText');
-  if (!houseText) return;
+  if (!houseTextEl) return;
   
-  const hero = document.getElementById('hero');
-  const heroHeight = hero ? hero.offsetHeight - window.innerHeight : 1000;
+  const heroHeight = heroEl ? heroEl.offsetHeight - window.innerHeight : 1000;
   const progress = Math.min(1, Math.max(0, scrollY / heroHeight));
   
   const startProgress = 0.20;
@@ -421,15 +424,15 @@ function updateHeroHouseText(scrollY) {
     if (translateY !== lastHouseTranslateY || roundedOpacity !== lastHouseOpacity) {
       lastHouseTranslateY = translateY;
       lastHouseOpacity = roundedOpacity;
-      houseText.style.transform = `translate3d(0px, ${translateY}px, 0px)`;
-      houseText.style.opacity = `${roundedOpacity}`;
-      houseText.style.pointerEvents = roundedOpacity <= 0.05 ? 'none' : 'auto';
+      houseTextEl.style.transform = `translate3d(0px, ${translateY}px, 0px)`;
+      houseTextEl.style.opacity = `${roundedOpacity}`;
+      houseTextEl.style.pointerEvents = roundedOpacity <= 0.05 ? 'none' : 'auto';
     }
   } else {
     if (lastHouseOpacity !== 0) {
       lastHouseOpacity = 0;
-      houseText.style.opacity = '0';
-      houseText.style.pointerEvents = 'none';
+      houseTextEl.style.opacity = '0';
+      houseTextEl.style.pointerEvents = 'none';
     }
   }
 }
@@ -437,10 +440,9 @@ function updateHeroHouseText(scrollY) {
 // Dynamic blur on the hero section: cached to prevent unnecessary GPU style recalculations
 let lastBlurAmount = -1;
 function updateHeroBlur(scrollY) {
-  const hero = document.getElementById('hero');
-  if (!hero || !canvas) return;
+  if (!heroEl || !canvas) return;
   
-  const heroHeight = hero.offsetHeight - window.innerHeight;
+  const heroHeight = heroEl.offsetHeight - window.innerHeight;
   const startBlur = heroHeight - 50;
   const endBlur = heroHeight + window.innerHeight * 0.6;
   
@@ -462,35 +464,39 @@ function updateHeroBlur(scrollY) {
 // Top Nav visibility: only stays active and visible inside the hero section
 let lastNavOpacity = null;
 function updateHeroNav(scrollY) {
-  const nav = document.getElementById('topNav');
-  if (!nav) return;
-  const hero = document.getElementById('hero');
-  const heroHeight = hero ? hero.offsetHeight - window.innerHeight : 5000;
+  if (!navEl) return;
+  const heroHeight = heroEl ? heroEl.offsetHeight - window.innerHeight : 5000;
   
   if (scrollY > heroHeight - 120) {
     const opacity = Math.max(0, +(1 - (scrollY - (heroHeight - 120)) / 120).toFixed(2));
     if (opacity !== lastNavOpacity) {
       lastNavOpacity = opacity;
-      nav.style.opacity = `${opacity}`;
-      nav.style.pointerEvents = opacity <= 0.05 ? 'none' : 'auto';
+      navEl.style.opacity = `${opacity}`;
+      navEl.style.pointerEvents = opacity <= 0.05 ? 'none' : 'auto';
     }
   } else {
     if (document.body.classList.contains('hero-loaded') && lastNavOpacity !== 1) {
       lastNavOpacity = 1;
-      nav.style.opacity = '1';
-      nav.style.pointerEvents = 'auto';
+      navEl.style.opacity = '1';
+      navEl.style.pointerEvents = 'auto';
     }
   }
 }
 
 // Eleanor Sterling Section Scroll Parallax Page Transition
 let lastParallaxTranslateY = null;
-function updateExpertParallax() {
-  const expertSection = document.getElementById('expert');
-  const portraitImg = document.querySelector('.expert-portrait-img');
-  if (!expertSection || !portraitImg) return;
+function updateExpertParallax(scrollY) {
+  if (!expertSectionEl) return;
+  const heroH = heroEl ? heroEl.offsetHeight - window.innerHeight : 2000;
+  // While scrolling within hero section, bypass getBoundingClientRect entirely to avoid reflow
+  if (scrollY < heroH - 200) return;
 
-  const rect = expertSection.getBoundingClientRect();
+  if (!portraitImgEl) {
+    portraitImgEl = document.querySelector('.expert-portrait-img');
+    if (!portraitImgEl) return;
+  }
+
+  const rect = expertSectionEl.getBoundingClientRect();
   const windowHeight = window.innerHeight;
   
   if (rect.top < windowHeight && rect.bottom > 0) {
@@ -498,7 +504,7 @@ function updateExpertParallax() {
     const translateY = Math.round((progress - 0.5) * -36);
     if (translateY !== lastParallaxTranslateY) {
       lastParallaxTranslateY = translateY;
-      portraitImg.style.transform = `scale(1.04) translate3d(0, ${translateY}px, 0)`;
+      portraitImgEl.style.transform = `scale(1.04) translate3d(0, ${translateY}px, 0)`;
     }
   }
 }
