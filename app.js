@@ -35,6 +35,16 @@ let offsetX = 0;
 let offsetY = 0;
 const imgRatio = 16 / 9;
 
+// Cached DOM element references to eliminate high-frequency layout queries
+const heroEl = document.getElementById('hero');
+const logoEl = document.getElementById('heroLogo');
+const houseTextEl = document.getElementById('heroHouseText');
+const navEl = document.getElementById('topNav');
+const expertSectionEl = document.getElementById('expert');
+let portraitImgEl = null;
+
+let cachedHeroScrollableDistance = 1;
+
 function resize() {
   if (!canvas || !context) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -62,6 +72,9 @@ function resize() {
     offsetY = 0;
   }
 
+  const heroH = heroEl ? heroEl.offsetHeight : (window.innerHeight * 6);
+  cachedHeroScrollableDistance = Math.max(1, heroH - window.innerHeight);
+
   lastRenderedIndex = -1;
   currentlyDrawnFrameIndex = -1;
   render(currentProgress);
@@ -84,14 +97,6 @@ function handleResize() {
 
 window.addEventListener('resize', handleResize, { passive: true });
 resize();
-
-// Cached DOM element references to eliminate high-frequency layout queries
-const heroEl = document.getElementById('hero');
-const logoEl = document.getElementById('heroLogo');
-const houseTextEl = document.getElementById('heroHouseText');
-const navEl = document.getElementById('topNav');
-const expertSectionEl = document.getElementById('expert');
-let portraitImgEl = null;
 
 // Fast nearest loaded frame finder (guarantees zero flicker or blank frames with zero latency)
 function getNearestLoadedFrameIndex(targetIdx) {
@@ -179,6 +184,10 @@ function prioritizeAround(currentIndex, direction = 1) {
   processQueue();
 }
 
+const MIN_INITIAL_BUFFER = 12; // Buffer 12 high-density frames in background RAM before revealing canvas
+let initialBufferLoaded = 0;
+let initialBufferReady = false;
+
 function processQueue() {
   while (activeLoads < MAX_CONCURRENT && queue.length > 0) {
     const idx = queue.shift();
@@ -197,19 +206,34 @@ function processQueue() {
       isLoaded[idx] = 1;
       activeLoads--;
 
-      if (idx === 0 || lastRenderedIndex === -1) {
-        triggerLoaderSplit();
+      if (!initialBufferReady) {
+        initialBufferLoaded++;
+        if (idx === 0) {
+          render(0);
+        }
+        if (initialBufferLoaded >= MIN_INITIAL_BUFFER) {
+          initialBufferReady = true;
+          triggerLoaderSplit();
+        }
       }
+
       render(currentProgress);
       processQueue();
     };
 
-    img.onload = onFinish;
-    img.onerror = onFinish;
     img.src = currentFramePath(idx + 1);
 
+    // Decode strictly on background worker thread to prevent main-thread UI jank
     if ('decode' in img) {
-      img.decode().then(onFinish).catch(onFinish);
+      img.decode()
+        .then(onFinish)
+        .catch(() => {
+          img.onload = onFinish;
+          img.onerror = onFinish;
+        });
+    } else {
+      img.onload = onFinish;
+      img.onerror = onFinish;
     }
   }
 }
@@ -232,18 +256,19 @@ function triggerLoaderSplit() {
   }, 2200);
 }
 
-// Fallback trigger in case frame 0 takes longer than expected to download
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(triggerLoaderSplit, 600);
-});
-setTimeout(triggerLoaderSplit, 800);
+// Fallback trigger so slow 3G networks never get stuck
+setTimeout(() => {
+  if (!loaderTriggered) {
+    triggerLoaderSplit();
+  }
+}, 1800);
 
 // Intelligent Preload: opening buffer for instant, butter-smooth initial scrubbing
 function initPreloader() {
   // Preload frame 0 with top priority
   enqueueFrame(0, true);
-  // Preload opening 35 frames buffer (1..34) for immediate 60-120fps scrubbing from frame 0
-  for (let i = 1; i < Math.min(35, frameCount); i++) {
+  // Preload opening 40 frames buffer (1..39) for immediate 60-120fps scrubbing from frame 0
+  for (let i = 1; i < Math.min(40, frameCount); i++) {
     enqueueFrame(i, false);
   }
   processQueue();
@@ -253,13 +278,8 @@ initPreloader();
 
 // Calculate scroll progress exclusively across the Hero sequence track
 function calculateHeroProgress(scrollY) {
-  if (!heroEl) {
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    return maxScroll > 0 ? scrollY / maxScroll : 0;
-  }
-  const heroScrollableDistance = heroEl.offsetHeight - window.innerHeight;
-  if (heroScrollableDistance <= 0) return 0;
-  return Math.min(1, Math.max(0, scrollY / heroScrollableDistance));
+  if (cachedHeroScrollableDistance <= 0) return 0;
+  return Math.min(1, Math.max(0, scrollY / cachedHeroScrollableDistance));
 }
 
 // High-Performance Unified Scroll Engine (Mobile Touch-Optimized + Desktop Momentum)
@@ -373,7 +393,7 @@ let lastHouseOpacity = null;
 function updateHeroHouseText(scrollY) {
   if (!houseTextEl) return;
   
-  const heroHeight = heroEl ? heroEl.offsetHeight - window.innerHeight : 1000;
+  const heroHeight = cachedHeroScrollableDistance;
   const progress = Math.min(1, Math.max(0, scrollY / heroHeight));
   
   const startProgress = 0.20;
@@ -416,7 +436,7 @@ let lastBlurAmount = -1;
 function updateHeroBlur(scrollY) {
   if (!heroEl || !canvas) return;
   
-  const heroHeight = heroEl.offsetHeight - window.innerHeight;
+  const heroHeight = cachedHeroScrollableDistance;
   const startBlur = heroHeight - 50;
   const endBlur = heroHeight + window.innerHeight * 0.6;
   
@@ -439,7 +459,7 @@ function updateHeroBlur(scrollY) {
 let lastNavOpacity = null;
 function updateHeroNav(scrollY) {
   if (!navEl) return;
-  const heroHeight = heroEl ? heroEl.offsetHeight - window.innerHeight : 5000;
+  const heroHeight = cachedHeroScrollableDistance;
   
   if (scrollY > heroHeight - 120) {
     const opacity = Math.max(0, +(1 - (scrollY - (heroHeight - 120)) / 120).toFixed(2));
